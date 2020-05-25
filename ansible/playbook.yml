@@ -1,0 +1,50 @@
+---
+# populate a fresh pop_os instance
+- hosts: 127.0.0.1
+  connection: local
+  vars:
+    local_user: "{{ ansible_user_id }}"
+    local_home: "{{ lookup('env','HOME') }}"
+    region_loc: "nl_NL.UTF-8"
+
+  roles:
+    - flatpak
+    - apt-packages
+    - {role: dconf-settings, tags: 'dconf-settings'}
+   
+  tasks:      
+  - name: Set user settings
+    become: yes
+    user:
+       name: "{{ local_user }}"
+       shell: /usr/bin/zsh
+       generate_ssh_key: yes
+
+  - name: Test if oh-my-zsh is present.
+    stat:
+      path: "{{ local_home }}/.oh-my-zsh"
+    register: ohmyzsh
+
+  - name: Install "oh-my-zsh"
+    shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    when: not ohmyzsh.stat.exists
+  
+  - name: Clone dotfiles
+    git:
+      repo: "https://github.com/kevinjelnl/dotfiles.git"
+      dest: "{{ local_home }}/dotfiles"
+      update: no
+      
+  - name: Set dotfiles
+    shell: ./install
+    args:
+      chdir: "{{ local_home }}/dotfiles"
+      
+  - name: Ensure a locale exists
+    become: yes
+    locale_gen:
+      name: "{{ region_loc }}"
+      state: present
+  
+  - include_role:
+      name: {role: dconf-settings, tags: 'dconf-settings'}

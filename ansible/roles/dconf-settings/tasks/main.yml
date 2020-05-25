@@ -1,0 +1,150 @@
+---
+# tasks file for /home/kevinjel/fresh_pop/roles/dconf-settings
+
+- name: Configure Gnome interfaces
+  dconf:
+    key: "/org/gnome/desktop/interface/{{ item.description }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { description: 'show-battery-percentage', value: 'true' }
+    - { description: 'clock-show-weekday', value: 'true' }
+    - { description: 'clock-format', value: '"24h"' }
+
+- name: Configure keyboard remaps
+  dconf:
+    key: "/org/gnome/desktop/input-sources/{{ item.description }}"
+    value: "{{ item.value | string }}"
+    state: present
+  loop:
+    - { description: 'xkb-options', value: "['caps:escape']" }
+    
+- name: Configure locale format
+  dconf:
+    key: "/system/locale/region"
+    value: "'nl_NL.UTF-8'"
+    state: present
+
+- name: Change touchpad speed
+  dconf:
+    key: "/org/gnome/desktop/peripherals/touchpad/speed"
+    value: "0.18382352941176472"
+    state: present
+
+- name: Configure keyboard shortcuts
+  dconf:
+    key: "{{ item.description | string }}"
+    value: "{{ item.value | string }}"
+    state: present
+  loop:
+    - { description: '/org/gnome/desktop/wm/keybindings/maximize', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/email', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/home', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/terminal', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/www', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-enter', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-move-right', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-resize-left', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-down', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-up', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/focus-down', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/focus-up', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-workspace-last', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-workspace-1', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-workspace-2', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-workspace-3', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-workspace-4', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-applications', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-applications-backward', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-windows', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-windows-backward', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-last', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/cycle-windows', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/cycle-windows-backward', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-group-backward', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/screencast', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/toggle-floating', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-input-source', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/maximize', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/toggle-fullscreen', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-applications', value: "['<Alt>Tab']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-applications-backward', value: "['<Shift><Alt>Tab']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/home', value: "['<Super>d']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/terminal', value: "['<Super>Return']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/www', value: "['<Shift><Super>Return']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/search', value: "['<Super>space']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-input-source-backward', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/search', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-enter', value: "['<Super>t']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-move-down', value: "['<Primary>l']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-swap-right', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-move-down', value: "['<Primary>j']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-swap-down', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-move-left', value: "['<Primary>l']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-move-left', value: "['<Primary>h']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-swap-left', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-move-right', value: "['<Primary>l']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-move-up', value: "['<Primary>k']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-swap-up', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-swap-down', value: "['<Primary><Shift>j']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-swap-left', value: "['<Primary><Shift>l']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-swap-right', value: "['<Primary><Shift>l']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-swap-left', value: "['<Primary><Shift>h']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/tile-swap-up', value: "['<Primary><Shift>k']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-up', value: "['<Super>k']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-down', value: "['<Super>j']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/focus-left', value: "['<Super>h']" }
+    - { description: '/org/gnome/shell/extensions/pop-shell/focus-right', value: "['<Super>l']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-monitor-down', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-monitor-left', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-monitor-right', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-monitor-up', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-workspace-down', value: "['<Shift><Super>j']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/move-to-workspace-up', value: "['<Shift><Super>k']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-panels', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-panels-backward', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/cycle-panels', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/cycle-panels-backward', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-1', value: "['<Super>1']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-2', value: "['<Super>2']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-3', value: "['<Super>3']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-to-workspace-4', value: "['<Super>4']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-windows', value: "['<Super>Tab']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-windows-backward', value: "['<Shift><Super>Tab']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/cycle-group', value: "['<Super>n']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/cycle-group-backward', value: "['<Shift><Super>n']" }
+    - { description: '/org/gnome/shell/keybindings/focus-active-notification', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/switch-group', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/window-screenshot-clip', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/area-screenshot-clip', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/screenshot-clip', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/window-screenshot', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/area-screenshot', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/screenshot', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/next', value: "['AudioNext']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/play', value: "['AudioPlay']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/previous', value: "['AudioPrev']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/volume-mute', value: "['AudioMute']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/volume-down', value: "['AudioLowerVolume']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/volume-up', value: "['AudioRaiseVolume']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/screensaver', value: "['<Shift><Super>q']" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/logout', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/keybindings/toggle-application-view', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/panel-main-menu', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/keybindings/open-application-menu', value: "['<Super>space']" }
+    - { description: '/org/gnome/shell/keybindings/open-application-menu', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/keybindings/toggle-message-tray', value: "{{ blank }}" }
+    - { description: '/org/gnome/shell/keybindings/toggle-overview', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/panel-run-dialog', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/screenreader', value: "{{ blank }}" }
+    - { description: '/org/gnome/settings-daemon/plugins/media-keys/magnifier', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/activate-window-menu', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/minimize', value: "['<Super>m']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/toggle-maximized', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/maximize', value: "['<Super>f']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/toggle-fullscreen', value: "['<Shift><Super>f']" }
+    - { description: '/org/gnome/desktop/wm/keybindings/begin-move', value: "{{ blank }}" }
+    - { description: '/org/gnome/desktop/wm/keybindings/begin-resize', value: "['<Super>r']" }
+
+
+

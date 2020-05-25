@@ -1,0 +1,19 @@
+---
+# tasks file for /home/kevinjel/fresh_pop/roles/flatpak
+# TODO: add the names + packages to the vars file
+
+- name: add several flatpak items
+  flatpak:
+    name: "{{ item.url }}"
+    state: present
+    method: user
+  loop:
+    - { name: 'YubicoAuthenticator', url: 'https://flathub.org/repo/appstream/com.yubico.yubioath.flatpakref' }
+    - { name: 'Spotify', url: 'https://flathub.org/repo/appstream/com.spotify.Client.flatpakref' }
+    - { name: 'VSCode', url: 'https://flathub.org/repo/appstream/com.visualstudio.code.flatpakref' }
+    - { name: 'DBeaver', url: 'https://flathub.org/repo/appstream/io.dbeaver.DBeaverCommunity.flatpakref' }    
+    - { name: 'Teams', url: 'https://flathub.org/repo/appstream/com.microsoft.Teams.flatpakref' }
+    - { name: 'Slack', url: 'https://flathub.org/repo/appstream/com.slack.Slack.flatpakref' }
+    - { name: 'Remmina', url: 'https://flathub.org/repo/appstream/org.remmina.Remmina.flatpakref' }
+    - { name: 'Dropbox', url: 'https://flathub.org/repo/appstream/com.dropbox.Client.flatpakref' }
+

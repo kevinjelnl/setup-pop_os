@@ -1,0 +1,17 @@
+---
+
+- name: Install apt packages
+  become: yes
+  apt:
+    pkg:
+    - bat
+    - fzf
+    - htop
+    - thefuck
+    - neovim
+    - tmux
+    - tree
+    - alacritty
+    - zsh
+    - appmenu-gtk3-module
+    - gnome-tweaks
