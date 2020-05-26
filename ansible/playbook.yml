@@ -15,9 +15,9 @@
       - 351	  # Icon Hider
   
   roles:
-    # - {role: gui_apps, tags: 'gui_apps'}
-    # - {role: apt-packages, tags: 'apt-packages'}
-    # - {role: jaredhocutt.gnome_extensions, tags: 'gnome_extensions'}
+    - {role: gui_apps, tags: 'gui_apps'}
+    - {role: apt-packages, tags: 'apt-packages'}
+    - {role: jaredhocutt.gnome_extensions, tags: 'gnome_extensions'}
    
   tasks:      
   - name: Set user settings
