@@ -6,11 +6,18 @@
     local_user: "{{ ansible_user_id }}"
     local_home: "{{ lookup('env','HOME') }}"
     region_loc: "nl_NL.UTF-8"
+    gnome_extension_ids:
+      - 1160	# Dash2Panel
+      - 277	# impatience
+      - 906	# sound input and output device chooser
+      - 921	# Multi Monitors Add-On 
+      - 351	# Icon Hider
 
   roles:
-    - flatpak
-    - apt-packages
-    - {role: dconf-settings, tags: 'dconf-settings'}
+    - {role: gui_apps, tags: 'gui_apps'}
+    - {role: apt-packages, tags: 'apt-packages'}
+#    - {role: dconf-settings, tags: 'dconf-settings'}
+    - {role: jaredhocutt.gnome_extensions, tags: 'gnome_extensions'}
    
   tasks:      
   - name: Set user settings

@@ -4,6 +4,7 @@
   become: yes
   apt:
     pkg:
+    - snapd
     - bat
     - fzf
     - htop
@@ -15,3 +16,14 @@
     - zsh
     - appmenu-gtk3-module
     - gnome-tweaks
+
+- name: Remove apt packages
+  become: yes
+  apt:
+    name: kdeconnect 
+    state: absent
+
+- name: Remove dependencies that are no longer required
+  become: yes
+  apt:
+    autoremove: yes
