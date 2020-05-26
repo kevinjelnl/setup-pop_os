@@ -6,18 +6,18 @@
     local_user: "{{ ansible_user_id }}"
     local_home: "{{ lookup('env','HOME') }}"
     region_loc: "nl_NL.UTF-8"
+    new_hostname: devxps
+    gist_file: '{{ playbook_dir.split("/")[0:-1]|join("/") }}/18dafb104e93c9a2362ffe85c0dfd02e/dconf-settings.dconf'
     gnome_extension_ids:
       - 1160	# Dash2Panel
-      - 277	# impatience
-      - 906	# sound input and output device chooser
-      - 921	# Multi Monitors Add-On 
-      - 351	# Icon Hider
-
+      - 277	  # impatience
+      - 906	  # sound input and output device chooser
+      - 351	  # Icon Hider
+  
   roles:
-    - {role: gui_apps, tags: 'gui_apps'}
-    - {role: apt-packages, tags: 'apt-packages'}
-#    - {role: dconf-settings, tags: 'dconf-settings'}
-    - {role: jaredhocutt.gnome_extensions, tags: 'gnome_extensions'}
+    # - {role: gui_apps, tags: 'gui_apps'}
+    # - {role: apt-packages, tags: 'apt-packages'}
+    # - {role: jaredhocutt.gnome_extensions, tags: 'gnome_extensions'}
    
   tasks:      
   - name: Set user settings
@@ -26,6 +26,19 @@
        name: "{{ local_user }}"
        shell: /usr/bin/zsh
        generate_ssh_key: yes
+
+  - name: Set hostname of the machine
+    become: yes
+    shell: "echo '{{ new_hostname }}' > '/etc/hostname'"
+
+  - name: Make sudo docker paswordless
+    become: yes
+    lineinfile:
+      path: /etc/sudoers.d/docker
+      line: '%sudo  ALL=(ALL:ALL) NOPASSWD:/snap/bin/docker'
+      create: yes
+      owner: root
+      mode: '0440'
 
   - name: Test if oh-my-zsh is present.
     stat:
@@ -52,6 +65,13 @@
     locale_gen:
       name: "{{ region_loc }}"
       state: present
-  
-  - include_role:
-      name: {role: dconf-settings, tags: 'dconf-settings'}
+
+  - name: Test if submodule with gist is present
+    stat:
+      path: "{{ gist_file }}"
+    register: dconfisthere
+
+  - name: load DCONF settings
+    # dump settings: dconf dump / > <outlocation> 
+    shell: "dconf load '/' < '{{ gist_file }}'"
+    when: dconfisthere.stat.exists

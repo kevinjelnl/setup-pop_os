@@ -7,7 +7,6 @@ install_venv() {
    sudo apt-get install python-apt-common -y
 }
 
-
 make_venv_dir() {
     mkdir -p $HOME/.virtualenvs
     # create the virtual environment
