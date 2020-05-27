@@ -13,12 +13,14 @@ make_venv_dir() {
     python3 -m venv --system-site-packages $HOME/.virtualenvs/ansible 
 }
 
-install_ansible() {
+install_pip_packages() {
     eval "$venv_dir/pip3 install ansible"
+    eval "$venv_dir/pip3 install docker"
 }
 
 echo "prepare ansible..."
 install_venv
 make_venv_dir
-install_ansible
+# this should be requirements.txt
+install_pip_packages
 echo "done..."

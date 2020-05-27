@@ -1,0 +1,22 @@
+---
+
+# These params in env dont seem to run!
+- name: Start dropbox into a dockercontainer
+  become: yes
+  docker_container:
+    name: 'dockerbox'
+    image: 'otherguy/dropbox:latest'
+    state: 'started'
+    restart: yes
+    env:
+      DROPBOX_GID: "{{ lookup('env','GUID') }}"
+      DROPBOX_UID: "{{ lookup('env','UID') }}"
+    volumes:
+       - "{{ lookup('env','HOME')}}/dbox:/opt/dropbox/Dropbox"
+       - "{{ lookup('env','HOME')}}/.config/dbox:/opt/dropbox/.dropbox"
+       - "/etc/timezone:/etc/timezone"
+       - "/etc/localtime:/etc/localtime"
+
+# - name: debug
+#   debug:
+#     msg: "{{ lookup('env', 'GID') }}"

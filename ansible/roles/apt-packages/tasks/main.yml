@@ -16,6 +16,7 @@
     - zsh
     - appmenu-gtk3-module
     - gnome-tweaks
+    - falkon
 
 - name: Remove apt packages
   become: yes

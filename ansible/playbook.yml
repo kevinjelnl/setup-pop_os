@@ -1,5 +1,5 @@
 ---
-# populate a fresh pop_os instance
+# populate a fresh Pop!_os instance
 - hosts: 127.0.0.1
   connection: local
   vars:
@@ -17,6 +17,7 @@
   roles:
     - {role: gui_apps, tags: 'gui_apps'}
     - {role: apt-packages, tags: 'apt-packages'}
+    - {role: dropbox, tags: 'dropbox'}
     - {role: jaredhocutt.gnome_extensions, tags: 'gnome_extensions'}
    
   tasks:      
@@ -30,6 +31,14 @@
   - name: Set hostname of the machine
     become: yes
     shell: "echo '{{ new_hostname }}' > '/etc/hostname'"
+
+  - name: Create dirs
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ local_home }}/storage"
+      - "{{ local_home }}/Apps"
 
   - name: Make sudo docker paswordless
     become: yes
@@ -72,6 +81,17 @@
     register: dconfisthere
 
   - name: load DCONF settings
-    # dump settings: dconf dump / > <outlocation> 
     shell: "dconf load '/' < '{{ gist_file }}'"
     when: dconfisthere.stat.exists
+  
+  - name: Set a cron to dump dconf into our gist
+    cron:
+      name: "Dump the dconf settings into a file"
+      special_time: weekly
+      job: "eval 'dconf dump / > {{ gist_file }}'"
+
+  - name: Set a cron to start Cryptomator after a reboot
+    cron:
+      name: "Dump the dconf settings into a file"
+      special_time: reboot
+      job: "nohup {{ local_home }}/Apps/cryptomator.AppImage &> /dev/null"
