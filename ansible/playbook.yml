@@ -15,23 +15,37 @@
       - 351	  # Icon Hider
   
   roles:
-    - {role: gui_apps, tags: 'gui_apps'}
-    - {role: apt-packages, tags: 'apt-packages'}
-    - {role: dropbox, tags: 'dropbox'}
-    - {role: jaredhocutt.gnome_extensions, tags: 'gnome_extensions'}
+    # - {role: gui_apps, tags: 'gui_apps'}
+    # - {role: apt-packages, tags: 'apt-packages'}
+    # - {role: dropbox, tags: 'dropbox'}
+    - {role: cryptomator, tags: 'cryptomator'}
+    # - {role: jaredhocutt.gnome_extensions, tags: 'gnome_extensions'}
    
   tasks:      
+  - name: Ensure group "docker" exists
+    become: yes
+    group:
+      name: docker
+      state: present
+
   - name: Set user settings
     become: yes
     user:
        name: "{{ local_user }}"
        shell: /usr/bin/zsh
+       groups: docker
+       append: yes
        generate_ssh_key: yes
+
+  - name: set the newgroup
+    become: yes
+    shell: "newgrp docker"
 
   - name: Set hostname of the machine
     become: yes
     shell: "echo '{{ new_hostname }}' > '/etc/hostname'"
 
+  #  TEST IF DIR EXSISTS, IF NOT > CREATE IT
   - name: Create dirs
     file:
       path: "{{ item }}"
@@ -39,6 +53,7 @@
     with_items:
       - "{{ local_home }}/storage"
       - "{{ local_home }}/Apps"
+      - "{{ local_home }}/.local/bin"
 
   - name: Make sudo docker paswordless
     become: yes
@@ -84,14 +99,10 @@
     shell: "dconf load '/' < '{{ gist_file }}'"
     when: dconfisthere.stat.exists
   
-  - name: Set a cron to dump dconf into our gist
+  - name: Set multiple crons
     cron:
-      name: "Dump the dconf settings into a file"
-      special_time: weekly
-      job: "eval 'dconf dump / > {{ gist_file }}'"
-
-  - name: Set a cron to start Cryptomator after a reboot
-    cron:
-      name: "Dump the dconf settings into a file"
-      special_time: reboot
-      job: "nohup {{ local_home }}/Apps/cryptomator.AppImage &> /dev/null"
+      name: "{{ item.name }}"
+      special_time: "{{ item.time }}"
+      job: "{{ item.job }}"
+    loop:
+      - { name: "dump dconf", time: "weekly", job: "/usr/bin/dconf dump / > {{ gist_file }}" }

@@ -1,0 +1,66 @@
+---
+    
+# - name: grep the latest version
+#   shell: curl --silent https://api.github.com/repos/cryptomator/cryptomator/releases/latest | grep '"tag_name":' | cut -d'"' -f4
+#   register: latest_version
+#   args:
+#     warn: no
+- set_fact:
+    app_dir: "{{ local_home }}/.local/bin"
+    latest_file: "{{ latest_version }}-{{ filename }}{{ extension }}"
+
+- name: debug the version
+  debug:
+    msg: "{{ latest_version }}"
+    # msg: "{{ latest_version.stdout }}"
+
+- name: Test if appimage exsists
+  stat:
+    path: "{{ app_dir }}/{{ latest_version }}"
+  register: crptm_image
+
+
+# #   WHEN IT DOES EXSISTS. EXIT OUT < USE BLOCK HERE
+
+- name: "debug if: {{ app_dir }}/{{ latest_version }} exsists"
+  debug:
+    msg: "{{ crptm_image.stat }}"
+
+- name: get cryptomator url from latest github
+  shell: curl -s https://api.github.com/repos/cryptomator/cryptomator/releases/latest | grep 'browser_download_url.*AppImage"' \ | cut -d ':' -f 2,3 \ | tr -d \"
+  register: url
+  args:
+    warn: no
+  
+- name: show the grepped url
+  debug:
+    msg: "{{ url }}"
+
+- set_fact:
+    file_to_get: "{{ url.stdout }}"
+
+- name: file_to_get
+  debug:
+    msg: "{{ file_to_get }}"
+
+
+# - name: find what does exsists
+#   find:
+#     paths: "{{ app_dir }} "
+#     patterns: '*-{{ filename }}{{ extension }}'
+#   register: current_version
+
+# - name: print current file
+#   debug:
+#     msg: "{{ current_version.matched }}"
+
+# - name: remove the current version
+#   file:
+#     path: "{{ item.path }}"
+#     state: absent
+#   with_items: current.version.files
+#   when: current_version.files
+
+
+
+    

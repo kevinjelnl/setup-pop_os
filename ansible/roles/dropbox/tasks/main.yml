@@ -8,6 +8,7 @@
     image: 'otherguy/dropbox:latest'
     state: 'started'
     restart: yes
+    restart_policy: always
     env:
       DROPBOX_GID: "{{ lookup('env','GUID') }}"
       DROPBOX_UID: "{{ lookup('env','UID') }}"
