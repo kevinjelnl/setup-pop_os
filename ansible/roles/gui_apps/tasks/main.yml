@@ -13,6 +13,7 @@
     - { name: 'Teams', url: 'https://flathub.org/repo/appstream/com.microsoft.Teams.flatpakref' }
     - { name: 'Slack', url: 'https://flathub.org/repo/appstream/com.slack.Slack.flatpakref' }
     - { name: 'Remmina', url: 'https://flathub.org/repo/appstream/org.remmina.Remmina.flatpakref' }
+    - { name: 'Flowblade', url: 'https://flathub.org/repo/appstream/io.github.jliljebl.Flowblade.flatpakref' }
 
 # - name: remove several flatpak items
 #   flatpak:
@@ -38,3 +39,11 @@
       - docker
       - p3x-redis-ui
       - yubioath-desktop
+      # - chromium
+
+# Remove "foo" snap
+- name: remove snap
+  become: yes
+  snap:
+    name: chromium
+    state: absent
