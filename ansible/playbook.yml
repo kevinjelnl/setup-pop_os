@@ -15,12 +15,12 @@
       - 351	  # Icon Hider
   
   roles:
-    - {role: powerlinefonts, tags: 'font'}
-    # - {role: gui_apps, tags: 'app'}
-    # - {role: apt_packages, tags: 'apt'}
-    # - {role: dropbox, tags: 'dropbox'}
-    # - {role: cryptomator, tags: 'crp'}
-    # - {role: jaredhocutt.gnome_extensions, tags: 'gext'}
+    # - {role: powerlinefonts, tags: 'font'}
+    - {role: gui_apps, tags: 'app'}
+    - {role: apt_packages, tags: 'apt'}
+    - {role: dropbox, tags: 'dropbox'}
+    - {role: cryptomator, tags: 'crp'}
+    - {role: jaredhocutt.gnome_extensions, tags: 'gext'}
    
   tasks:      
   - name: Ensure group "docker" exists
