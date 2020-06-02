@@ -42,6 +42,3 @@
         state: link
 
   when: cryptomator_app.matched == 0
-
-
-# https://stackoverflow.com/questions/35984151/how-to-create-new-system-service-by-ansible-playbook

@@ -39,11 +39,11 @@
       - docker
       - p3x-redis-ui
       - yubioath-desktop
-      # - chromium
+      - chromium
 
 # Remove "foo" snap
-- name: remove snap
-  become: yes
-  snap:
-    name: chromium
-    state: absent
+# - name: remove snap
+#   become: yes
+#   snap:
+#     name: chromium
+#     state: absent

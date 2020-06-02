@@ -17,7 +17,3 @@
        - "{{ lookup('env','HOME')}}/.config/dbox:/opt/dropbox/.dropbox"
        - "/etc/timezone:/etc/timezone"
        - "/etc/localtime:/etc/localtime"
-
-# - name: debug
-#   debug:
-#     msg: "{{ lookup('env', 'GID') }}"

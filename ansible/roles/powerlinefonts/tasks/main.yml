@@ -1,0 +1,15 @@
+---
+
+- set_fact:
+    tempdir: /var/tmp/pline_fonts
+
+- name: install powerline fonts
+  git:
+    repo: https://github.com/powerline/fonts.git
+    depth: 1
+    dest: "{{ tempdir }}"
+
+- name: run the installer
+  shell:
+    cmd: "./install.sh && fc-cache -vf"
+    chdir: "{{ tempdir }}"

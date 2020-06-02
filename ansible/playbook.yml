@@ -15,11 +15,12 @@
       - 351	  # Icon Hider
   
   roles:
-    - {role: gui_apps, tags: 'app'}
-    - {role: apt_packages, tags: 'apt'}
-    - {role: dropbox, tags: 'dropbox'}
-    - {role: cryptomator, tags: 'crp'}
-    - {role: jaredhocutt.gnome_extensions, tags: 'gext'}
+    - {role: powerlinefonts, tags: 'font'}
+    # - {role: gui_apps, tags: 'app'}
+    # - {role: apt_packages, tags: 'apt'}
+    # - {role: dropbox, tags: 'dropbox'}
+    # - {role: cryptomator, tags: 'crp'}
+    # - {role: jaredhocutt.gnome_extensions, tags: 'gext'}
    
   tasks:      
   - name: Ensure group "docker" exists
@@ -83,6 +84,10 @@
     shell: ./install
     args:
       chdir: "{{ local_home }}/dotfiles"
+
+# # change the remote of the repo to SSH
+# git remote set-url origin git@github.com:kevinjelnl/dotfiles.git
+
       
   - name: Ensure a locale exists
     become: yes
