@@ -16,13 +16,14 @@
     - zsh
     - appmenu-gtk3-module
     - gnome-tweaks
+    - tlp
     - network-manager-l2tp
     - network-manager-l2tp-gnome
 
 - name: Remove apt packages
   become: yes
   apt:
-    name: ['falkon', 'kdeconnect', 'midori', 'fonts-powerline']
+    name: ['falkon', 'kdeconnect', 'midori', 'fonts-powerline', 'kazam', 'xl2tpd']
     state: absent
 
 - name: Remove dependencies that are no longer required

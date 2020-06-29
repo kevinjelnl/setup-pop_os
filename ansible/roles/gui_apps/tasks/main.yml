@@ -15,13 +15,13 @@
     - { name: 'Remmina', url: 'https://flathub.org/repo/appstream/org.remmina.Remmina.flatpakref' }
     - { name: 'Flowblade', url: 'https://flathub.org/repo/appstream/io.github.jliljebl.Flowblade.flatpakref' }
 
-# - name: remove several flatpak items
-#   flatpak:
-#     name: "{{ item.url }}"
-#     state: absent
-#     method: user
-#   loop:
-#     - { name: 'Dropbox', url: 'https://flathub.org/repo/appstream/com.dropbox.Client.flatpakref' }
+- name: remove several flatpak items
+  flatpak:
+    name: "{{ item.url }}"
+    state: absent
+    method: user
+  loop:
+    - { name: 'Visual Studio Code - OSS', url: 'https://flathub.org/repo/appstream/com.visualstudio.code.oss.flatpakref' }
 
 - name: add several snap items with --classic tag
   become: yes
@@ -29,8 +29,8 @@
     name: "{{ item }}"
     classic: yes
   loop:
-    - code
     - go
+    - code
 
 - name: Install snap packages
   become: yes
@@ -40,10 +40,14 @@
       - p3x-redis-ui
       - yubioath-desktop
       - chromium
+      - vlc
+      - pdfmixtool
+      - okular
 
-# Remove "foo" snap
-# - name: remove snap
-#   become: yes
-#   snap:
-#     name: chromium
-#     state: absent
+- name: remove a snap package
+  become: yes
+  snap:
+    name: 
+      - auto-cpufreq
+      - codium
+    state: absent

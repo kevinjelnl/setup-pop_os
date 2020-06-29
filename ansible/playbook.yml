@@ -13,9 +13,12 @@
       - 277	  # impatience
       - 906	  # sound input and output device chooser
       - 351	  # Icon Hider
+      - 1251  # blyr
+      - 2660  # transparent panel
+      - 800   # remove dropdown arrows
   
   roles:
-    # - {role: powerlinefonts, tags: 'font'}
+      #- {role: powerlinefonts, tags: 'font'}
     - {role: gui_apps, tags: 'app'}
     - {role: apt_packages, tags: 'apt'}
     - {role: dropbox, tags: 'dropbox'}
@@ -55,6 +58,7 @@
       - "{{ local_home }}/storage"
       - "{{ local_home }}/Apps"
       - "{{ local_home }}/.local/bin"
+      - "{{ local_home }}/go"
 
   - name: Make sudo docker paswordless
     become: yes
