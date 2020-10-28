@@ -17,13 +17,15 @@
     - appmenu-gtk3-module
     - gnome-tweaks
     - tlp
-    - network-manager-l2tp
-    - network-manager-l2tp-gnome
+    - wmctrl
+    - poppler-utils
+    - libnotify-bin
+    - autojump
 
 - name: Remove apt packages
   become: yes
   apt:
-    name: ['falkon', 'kdeconnect', 'midori', 'fonts-powerline', 'kazam', 'xl2tpd']
+    name: ['falkon', 'kdeconnect', 'midori', 'kazam']
     state: absent
 
 - name: Remove dependencies that are no longer required

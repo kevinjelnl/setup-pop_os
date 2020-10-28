@@ -8,12 +8,10 @@
     state: present
     method: user
   loop:
-    - { name: 'Spotify', url: 'https://flathub.org/repo/appstream/com.spotify.Client.flatpakref' }
     - { name: 'DBeaver', url: 'https://flathub.org/repo/appstream/io.dbeaver.DBeaverCommunity.flatpakref' }    
     - { name: 'Teams', url: 'https://flathub.org/repo/appstream/com.microsoft.Teams.flatpakref' }
     - { name: 'Slack', url: 'https://flathub.org/repo/appstream/com.slack.Slack.flatpakref' }
     - { name: 'Remmina', url: 'https://flathub.org/repo/appstream/org.remmina.Remmina.flatpakref' }
-    - { name: 'Flowblade', url: 'https://flathub.org/repo/appstream/io.github.jliljebl.Flowblade.flatpakref' }
 
 - name: remove several flatpak items
   flatpak:
@@ -22,6 +20,8 @@
     method: user
   loop:
     - { name: 'Visual Studio Code - OSS', url: 'https://flathub.org/repo/appstream/com.visualstudio.code.oss.flatpakref' }
+    - { name: 'Flowblade', url: 'https://flathub.org/repo/appstream/io.github.jliljebl.Flowblade.flatpakref' }
+    - { name: 'Spotify', url: 'https://flathub.org/repo/appstream/com.spotify.Client.flatpakref' }
 
 - name: add several snap items with --classic tag
   become: yes
@@ -43,6 +43,7 @@
       - vlc
       - pdfmixtool
       - okular
+      - ncspot
 
 - name: remove a snap package
   become: yes
