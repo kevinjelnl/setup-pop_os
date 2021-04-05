@@ -9,10 +9,16 @@
     new_hostname: devxps
     gist_file: '{{ playbook_dir.split("/")[0:-1]|join("/") }}/18dafb104e93c9a2362ffe85c0dfd02e/dconf-settings.dconf'
     gnome_extension_ids:
+      - 1092  # AudioSwitcher
+      - 517   # Caffeine
       - 1160  # Dash2Panel
-      - 277	  # impatience
-      - 906	  # sound input and output device chooser
+      - 2087  # DesktopIcons
+      - 1005  # Focus my window
       - 351	  # Icon Hider
+      - 277	  # impatience
+      - 1403  # Remove alt-tab delay
+      - 1238  # Time++
+      - 1414  # Unblank lockscreen
   
   roles:
     - {role: gui_apps, tags: 'app'}

@@ -31,6 +31,7 @@
   loop:
     - go
     - code
+    - dotnet-sdk
 
 - name: Install snap packages
   become: yes

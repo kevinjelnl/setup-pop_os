@@ -21,6 +21,9 @@
     - poppler-utils
     - libnotify-bin
     - autojump
+    - npm
+    - redshift-gtk
+    - dconf-editor
 
 - name: Remove apt packages
   become: yes
