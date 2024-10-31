@@ -1,0 +1,44 @@
+---
+- name: include vars
+  include_vars: ../vars/main.yml
+
+- name: Install or remove GUI applications
+  block:
+    - name: Install SNAP classic package(s)
+      snap:
+        name: "{{ item }}"
+        state: present
+        classic: yes
+      loop: "{{ linux.install.snap_classic }}"
+
+    - name: Install SNAP package(s)
+      snap:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ linux.install.snap }}"
+
+    - name: Remove SNAP package(s)
+      snap:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ linux.remove.snap }}"
+
+    - name: Install Flatpak package(s)
+      flatpak:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ linux.install.flatpak }}"
+
+    - name: Remove Flatpak package(s)
+      flatpak:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ linux.remove.flatpak }}"
+
+    - include_tasks: install_appimage.yml
+      with_items: "{{ linux.install.app_image }}"
+      loop_control:
+        loop_var: app_image
+  become: true
+  when: ansible_os_family in linux_distros
+  tags: manage_gui_apps

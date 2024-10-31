@@ -1,0 +1,29 @@
+linux:
+  install:
+    snap_classic:
+      - go
+      - node
+      - alacritty
+    snap:
+      - docker
+    flatpak:
+      - org.videolan.VLC
+      - com.visualstudio.code
+      - com.getmailspring.Mailspring
+      - com.hunterwittenborn.Celeste
+      - com.mattjakeman.ExtensionManager
+      - com.github.tchx84.Flatseal
+    app_image:
+      - https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+  remove:
+    snap:
+      - auto-cpufreq
+      - codium
+      - code
+      - vlc
+      - mailspring
+      - celeste
+    flatpak:
+      - com.bitwarden.desktop
+      - io.neovim.nvim
+      - org.contourterminal.Contour

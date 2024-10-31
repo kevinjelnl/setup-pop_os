@@ -1,0 +1,39 @@
+---
+- name: include vars
+  include_vars: ../vars/main.yml
+
+- name: Install or remove apt packages on Debian or Ubuntu
+  block:
+    - name: Install apt packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ apt.install }}"
+
+    - name: Remove apt packages
+      apt:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ apt.remove }}"
+  become: true
+  when: ansible_os_family in linux_distros
+  tags: manage_packages
+
+- block:
+    - name: Install pip packages
+      pip:
+        name: "{{ item }}"
+      loop: "{{ pip }}"
+      become: true
+
+    - name: Install pipx packages
+      community.general.pipx:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ pipx }}"
+
+    - name: Install cargo packages
+      community.general.cargo:
+        name: "{{ item }}"
+      loop: "{{ cargo }}"
+  tags: manage_packages

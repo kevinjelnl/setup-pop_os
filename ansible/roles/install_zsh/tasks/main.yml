@@ -1,0 +1,35 @@
+---
+- block:
+    - name: include vars
+      include_vars: ../vars/main.yml
+
+    - name: Test if oh-my-zsh is present.
+      stat:
+        path: "{{ home_dir +'/.oh-my-zsh' }}"
+      register: ohmyzsh
+
+    - name: Install "oh-my-zsh"
+      shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      when: not ohmyzsh.stat.exists
+
+    - name: Test if the file .zshrc.pre-oh-my-zsh exists
+      stat:
+        path: "{{ home_dir + '/.zshrc.pre-oh-my-zsh' }}"
+      register: zshrc_pre_oh_my_zsh
+
+    - name: Overwrite .zshrc with .zshrc.pre-oh-my-zsh
+      shell: mv {{ home_dir + '/.zshrc.pre-oh-my-zsh' }} {{ home_dir + '/.zshrc' }}
+      when: zshrc_pre_oh_my_zsh.stat.exists
+
+    - name: Test if the custom zsh theme is present
+      stat:
+        path: "{{ home_dir + '/.oh-my-zsh/custom/themes/' + zsh_theme }}"
+      register: zsh_theme_present
+
+    - name: Symlink the custom zsh theme to the oh-my-zsh custom themes directory
+      file:
+        src: "{{ home_dir + '/.config/zsh/' + zsh_theme }}"
+        dest: "{{ home_dir + '/.oh-my-zsh/custom/themes/' + zsh_theme }}"
+        state: link
+      when: zsh_theme_present.stat.exists
+  tags: install_zsh

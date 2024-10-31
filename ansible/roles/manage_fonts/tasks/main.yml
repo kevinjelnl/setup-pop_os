@@ -1,0 +1,25 @@
+---
+- name: include vars
+  include_vars: ../vars/main.yml
+
+- block:
+    - name: Get the latest version of the nerd-fonts
+      uri:
+        url: https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest
+        return_content: yes
+      register: nerd_fonts_response
+
+    - name: Set the nerd_fonts_version
+      set_fact:
+        nerd_fonts_version: "{{ nerd_fonts_response.json.name }}"
+
+    - name: Create the font directory
+      file:
+        path: "{{ fonts_dir }}"
+        state: directory
+
+    - include_tasks: install_font.yml
+      with_items: "{{ fonts }}"
+      loop_control:
+        loop_var: font
+  tags: manage_fonts

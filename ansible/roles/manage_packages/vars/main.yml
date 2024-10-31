@@ -1,0 +1,42 @@
+apt:
+  install:
+    - appmenu-gtk-module-common
+    - appmenu-gtk2-module
+    - appmenu-gtk3-module
+    - autojump
+    - bat
+    - btop
+    - cargo
+    - dconf-editor
+    - flatpak
+    - fzf
+    - gnome-tweaks
+    - htop
+    - libdbusmenu-glib4
+    - pipx
+    - ripgrep
+    - snapd
+    - thefuck
+    - tlp
+    - tmux
+    - tree
+    - wmctrl
+    - xsel
+    - yadm
+    - yubikey-manager-qt
+    - zsh
+    - zsh-autosuggestions
+    - zsh-syntax-highlighting
+  remove:
+    - falkon
+    - redshift-gtk
+
+pip:
+  - psutil
+  - tldr
+
+pipx:
+  - poetry
+
+cargo:
+  - lsd

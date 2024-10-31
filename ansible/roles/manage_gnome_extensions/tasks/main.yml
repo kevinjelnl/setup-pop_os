@@ -1,0 +1,26 @@
+---
+- block:
+    - name: Install the gnome-extensions-cli pip3 package
+      pip:
+        name: gnome-extensions-cli
+        state: present
+        extra_args: --upgrade
+        executable: pip3
+      become: true
+
+    - name: Run the gext shell command with the list argument
+      shell: gext list
+      register: r_gext_list
+
+    - name: Install Gnome Shell extensions
+      shell:
+        cmd: "gext --filesystem install {{ item }}"
+      loop: "{{ gnome_extension_uuids }}"
+      when: item not in r_gext_list.stdout_lines | map('regex_replace', '.*\\((.*)\\).*', '\\1') | list
+
+    - name: Remove Gnome Shell extensions
+      shell:
+        cmd: "gext --filesystem uninstall {{ item }}"
+      loop: "{{ remove_gnome_extension_uuids }}"
+      when: item in r_gext_list.stdout_lines | map('regex_replace', '.*\\((.*)\\).*', '\\1') | list
+  tags: manage_gnome_extensions

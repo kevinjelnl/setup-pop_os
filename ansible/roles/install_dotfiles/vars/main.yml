@@ -1,0 +1,3 @@
+dotfile_root_dir: "{{ ansible_env.HOME }}"
+dotfile_dirname: "dotfiles"
+dotfile_url: "https://github.com/kevinjelnl/dotfiles.git"

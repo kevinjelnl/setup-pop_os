@@ -1,0 +1,12 @@
+---
+- name: Test if the font is already installed
+  shell: "ls {{ fonts_dir }}/{{ font }}*"
+  register: font_exsists
+  ignore_errors: true
+
+- name: Download the font {{ font }}
+  unarchive:
+    src: "{{ font_url + nerd_fonts_version + '/' + font + '.zip' }}"
+    dest: "{{ fonts_dir + '/' }}"
+    remote_src: yes
+  when: font_exsists.rc != 0

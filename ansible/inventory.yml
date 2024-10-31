@@ -1,0 +1,7 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+    # some_other_host:
+    #   ansible_host: 127.0.0.1
+    #   ansible_user: some_user

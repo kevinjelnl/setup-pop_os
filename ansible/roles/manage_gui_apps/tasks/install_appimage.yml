@@ -1,0 +1,16 @@
+---
+- name: Check if the AppImage is already installed
+  stat:
+    path: /usr/local/bin/{{ app_image | basename | regex_replace('\.appimage', '') }}
+  register: appimage
+
+- block:
+    - name: Install AppImage packages
+      get_url:
+        url: "{{ app_image }}"
+        dest: /usr/local/bin/
+        mode: 0755
+
+    - name: Rename AppImage
+      command: mv /usr/local/bin/{{ app_image | basename }} /usr/local/bin/{{ app_image | basename | regex_replace('\.appimage', '') }}
+  when: appimage.stat.exists == False

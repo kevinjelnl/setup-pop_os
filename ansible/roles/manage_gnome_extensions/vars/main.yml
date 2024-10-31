@@ -1,0 +1,11 @@
+---
+# https://extensions.gnome.org/
+gnome_extension_uuids:
+  - just-perfection-desktop@just-perfection #3843
+  - dash-to-panel@jderose9.github.com #1160
+  - ding@rastersoft.com #2087
+  - focus@scaryrawr.github.io #3924
+
+remove_gnome_extension_uuids:
+  - tilingshell@ferrarodomenico.com #7065
+  - Vitals@CoreCoding.com #1460

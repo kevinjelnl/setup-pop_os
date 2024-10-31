@@ -1,124 +1,117 @@
 ---
-# populate a fresh Pop!_os instance
-- hosts: 127.0.0.1
-  connection: local
+- name: Main playbook for configuring the system
+  hosts: all
   vars:
+    linux_distros: ["Debian", "Ubuntu"]
     local_user: "{{ ansible_user_id }}"
-    local_home: "{{ lookup('env','HOME') }}"
+    home_dir: "{{ lookup('env','HOME') }}"
     region_loc: "nl_NL.UTF-8"
-    new_hostname: devxps
-    gist_file: '{{ playbook_dir.split("/")[0:-1]|join("/") }}/18dafb104e93c9a2362ffe85c0dfd02e/dconf-settings.dconf'
-    gnome_extension_ids:
-      - 1092  # AudioSwitcher
-      - 517   # Caffeine
-      - 1160  # Dash2Panel
-      - 2087  # DesktopIcons
-      - 1005  # Focus my window
-      - 351	  # Icon Hider
-      - 277	  # impatience
-      - 1403  # Remove alt-tab delay
-      - 1238  # Time++
-      - 1414  # Unblank lockscreen
-  
-  roles:
-    - {role: gui_apps, tags: 'app'}
-    - {role: apt_packages, tags: 'apt'}
-    - {role: dropbox, tags: 'dropbox'}
-    - {role: cryptomator, tags: 'crp'}
-    - {role: jaredhocutt.gnome_extensions, tags: 'gext'}
-   
-  tasks:      
-  - name: Ensure group "docker" exists
-    become: yes
-    group:
-      name: docker
-      state: present
+    gist_file: "{{ playbook_dir.split('/')[0:-1]|join('/') }}/18dafb104e93c9a2362ffe85c0dfd02e/dconf-settings.ini"
+    dirs_to_create:
+      - "{{ home_dir + '/.local/bin' }}"
+      - "{{ home_dir + '/go' }}"
+      - "{{ home_dir + '/.ssh' }}"
 
-  - name: Set user settings
-    become: yes
-    user:
-       name: "{{ local_user }}"
-       shell: /usr/bin/zsh
-       groups: docker
-       append: yes
-       generate_ssh_key: yes
+  tasks:
+    - name: Manage installation and removal of system packages
+      include_role:
+        name: manage_packages
+        tasks_from: main
+      tags: "manage_packages"
 
-  - name: set the newgroup
-    become: yes
-    shell: "newgrp docker"
+    - name: Create directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ local_user }}"
+      with_items: "{{ dirs_to_create }}"
 
-  - name: Set hostname of the machine
-    become: yes
-    shell: "echo '{{ new_hostname }}' > '/etc/hostname'"
+    - name: Manage installation and removal of GUI applications
+      include_role:
+        name: manage_gui_apps
+        tasks_from: main
+      tags: "manage_gui_apps"
 
-  #  TEST IF DIR EXSISTS, IF NOT > CREATE IT
-  - name: Create dirs
-    file:
-      path: "{{ item }}"
-      state: directory
-    with_items:
-      - "{{ local_home }}/storage"
-      - "{{ local_home }}/Apps"
-      - "{{ local_home }}/.local/bin"
-      - "{{ local_home }}/go"
+    - name: Manage installation and removal GNOME extensions based on the manage_gnome_extensions role
+      include_role:
+        name: manage_gnome_extensions
+        tasks_from: main
+      tags: "manage_gnome_extensions"
+      when: ansible_os_family in linux_distros
 
-  - name: Make sudo docker paswordless
-    become: yes
-    lineinfile:
-      path: /etc/sudoers.d/docker
-      line: '%sudo  ALL=(ALL:ALL) NOPASSWD:/snap/bin/docker'
-      create: yes
-      owner: root
-      mode: '0440'
+    - name: Manage installation and removal of fonts
+      include_role:
+        name: manage_fonts
+        tasks_from: main
+      tags: "manage_fonts"
 
-  - name: Test if oh-my-zsh is present.
-    stat:
-      path: "{{ local_home }}/.oh-my-zsh"
-    register: ohmyzsh
+    - name: Install the dotfiles mith the install_dotfiles role
+      include_role:
+        name: install_dotfiles
+        tasks_from: main
+      tags: "install_dotfiles"
 
-  - name: Install "oh-my-zsh"
-    shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-    when: not ohmyzsh.stat.exists
-  
-  - name: Clone dotfiles
-    git:
-      repo: "https://github.com/kevinjelnl/dotfiles.git"
-      dest: "{{ local_home }}/dotfiles"
-      update: no
+    - name: Install oh-my-zsh and set the shell to zsh
+      include_role:
+        name: install_zsh
+        tasks_from: main
+      tags: "install_zsh"
 
-  - name: Set dotfiles
-    shell: ./install
-    args:
-      chdir: "{{ local_home }}/dotfiles"
+    - name: Register the current shell
+      shell: echo $SHELL
+      register: current_shell
 
-# # change the remote of the repo to SSH
-# git remote set-url origin git@github.com:kevinjelnl/dotfiles.git
+    - name: Change the shell for the user
+      user:
+        name: "{{ local_user }}"
+        shell: /usr/bin/zsh
+      become: true
+      when: current_shell.stdout != "/usr/bin/zsh"
 
-  - name: Ensure a locale exists
-    become: yes
-    locale_gen:
-      name: "{{ region_loc }}"
-      state: present
+    - name: Checking if vim-plug is present
+      stat:
+        path: "{{ home_dir + '/.local/share/nvim/site/autoload/plug.vim' }}"
+      register: vim_plug
 
-  - name: Test if submodule with gist is present
-    stat:
-      path: "{{ gist_file }}"
-    register: dconfisthere
+    - name: Install vim-plug
+      shell: curl -fLo {{ home_dir + '/.local/share/nvim/site/autoload/plug.vim' }} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+      when: not vim_plug.stat.exists
 
-  - name: load DCONF settings
-    shell: "dconf load '/' < '{{ gist_file }}'"
-    when: dconfisthere.stat.exists
-  
-  - name: Set multiple crons
-    cron:
-      name: "{{ item.name }}"
-      special_time: "{{ item.time }}"
-      job: "{{ item.job }}"
-    loop:
-      - { name: "dump dconf", time: "weekly", job: "/usr/bin/dconf dump / > {{ gist_file }}" }
-  
-  - name: Install multiple python packages
-    pip:
-      name: "tldr"
-      name: "http-prompt"
-      name: "psutil"
+    - name: Ensure group "docker" exists
+      group:
+        name: docker
+        state: present
+      become: true
+
+    - name: Update the user
+      user:
+        name: "{{ local_user }}"
+        groups: docker
+        append: true
+      become: true
+
+    - name: Generate an OpenSSH keypair with the default values (4096 bits, rsa)
+      community.crypto.openssh_keypair:
+        path: "{{ home_dir + '/.ssh/id_rsa' }}"
+
+    - name: Check if the dconf settings file exists
+      stat:
+        path: "{{ gist_file }}"
+      register: dcconfig_gist
+
+    - block:
+        - name: load DCONF settings
+          shell: "dconf load '/' < '{{ gist_file }}'"
+
+        - name: Set multiple crons
+          cron:
+            name: "{{ item.name }}"
+            special_time: "{{ item.time }}"
+            job: "{{ item.job }}"
+          loop:
+            - {
+                name: "dump dconf",
+                time: "weekly",
+                job: "/usr/bin/dconf dump / > {{ gist_file }}",
+              }
+      when: dcconfig_gist.stat.exists

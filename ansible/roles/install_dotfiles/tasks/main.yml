@@ -1,0 +1,28 @@
+---
+- block:
+    - name: include vars
+      include_vars: ../vars/main.yml
+
+    - name: Test if the dotfiles are present
+      stat:
+        path: "{{ dotfile_root_dir + '/README.md' }}"
+      register: dotfiles_present
+
+    - block:
+        - name: Clone the dotfiles with yadm
+          shell: "yadm clone {{ dotfile_url }} -f --no-bootstrap"
+          args:
+            chdir: "{{ dotfile_root_dir }}"
+      when: not dotfiles_present.stat.exists
+
+    - name: Pull the latest version of the dotfiles with yadm
+      shell: yadm pull
+      when: dotfiles_present.stat.exists
+    
+    - name: symlink .config/git/.gitconfig
+      file:
+        src: "{{ dotfile_root_dir + '/.config/git/gitconfig' }}"
+        dest: "{{ home_dir + '.gitconfig' }}"
+        state: link
+  become: true
+  tags: install_dotfiles
