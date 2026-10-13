@@ -1,0 +1,14 @@
+---
+- name: Ensure Alacritty configuration directory exists
+  ansible.builtin.file:
+    path: "{{ dotfiles_home }}/.config/alacritty"
+    state: directory
+    mode: '0755'
+  become: false
+
+- name: Configure Alacritty
+  ansible.builtin.copy:
+    src: alacritty.toml
+    dest: "{{ dotfiles_home }}/.config/alacritty/alacritty.toml"
+    mode: '0644'
+  become: false

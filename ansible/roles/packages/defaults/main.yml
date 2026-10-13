@@ -1,0 +1,6 @@
+---
+packages_to_install:
+  - alacritty
+packages_to_remove:
+  - firefox
+  - thunderbird

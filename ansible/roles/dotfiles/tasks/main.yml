@@ -1,0 +1,18 @@
+---
+- name: Check whether the yadm repository already exists
+  ansible.builtin.stat:
+    path: "{{ dotfiles_home }}/.local/share/yadm/repo.git"
+  register: yadm_repository
+  become: false
+
+- name: Clone the dotfiles repository with yadm
+  ansible.builtin.command:
+    argv:
+      - yadm
+      - clone
+      - https://github.com/kevinjelnl/dotfiles
+  args:
+    chdir: "{{ dotfiles_home }}"
+    creates: "{{ dotfiles_home }}/.local/share/yadm/repo.git"
+  become: false
+  when: not yadm_repository.stat.exists
