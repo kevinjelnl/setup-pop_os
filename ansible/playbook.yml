@@ -1,117 +1,55 @@
 ---
-- name: Main playbook for configuring the system
-  hosts: all
+- name: Configure Pop!_OS workstation
+  hosts: localhost
+  become: true
+  gather_facts: true
   vars:
-    linux_distros: ["Debian", "Ubuntu"]
-    local_user: "{{ ansible_user_id }}"
-    home_dir: "{{ lookup('env','HOME') }}"
-    region_loc: "nl_NL.UTF-8"
-    gist_file: "{{ playbook_dir.split('/')[0:-1]|join('/') }}/18dafb104e93c9a2362ffe85c0dfd02e/dconf-settings.ini"
-    dirs_to_create:
-      - "{{ home_dir + '/.local/bin' }}"
-      - "{{ home_dir + '/go' }}"
-      - "{{ home_dir + '/.ssh' }}"
+    dotfiles_home: "{{ lookup('env', 'HOME') }}"
 
   tasks:
-    - name: Manage installation and removal of system packages
-      include_role:
-        name: manage_packages
-        tasks_from: main
-      tags: "manage_packages"
+    - name: Manage APT packages
+      ansible.builtin.include_role:
+        name: packages
+      tags: packages
 
-    - name: Create directories
-      file:
-        path: "{{ item }}"
-        state: directory
-        owner: "{{ local_user }}"
-      with_items: "{{ dirs_to_create }}"
-
-    - name: Manage installation and removal of GUI applications
-      include_role:
-        name: manage_gui_apps
-        tasks_from: main
-      tags: "manage_gui_apps"
-
-    - name: Manage installation and removal GNOME extensions based on the manage_gnome_extensions role
-      include_role:
-        name: manage_gnome_extensions
-        tasks_from: main
-      tags: "manage_gnome_extensions"
-      when: ansible_os_family in linux_distros
-
-    - name: Manage installation and removal of fonts
-      include_role:
-        name: manage_fonts
-        tasks_from: main
-      tags: "manage_fonts"
-
-    - name: Install the dotfiles mith the install_dotfiles role
-      include_role:
-        name: install_dotfiles
-        tasks_from: main
-      tags: "install_dotfiles"
-
-    - name: Install oh-my-zsh and set the shell to zsh
-      include_role:
-        name: install_zsh
-        tasks_from: main
-      tags: "install_zsh"
-
-    - name: Register the current shell
-      shell: echo $SHELL
-      register: current_shell
-
-    - name: Change the shell for the user
-      user:
-        name: "{{ local_user }}"
-        shell: /usr/bin/zsh
-      become: true
-      when: current_shell.stdout != "/usr/bin/zsh"
-
-    - name: Checking if vim-plug is present
-      stat:
-        path: "{{ home_dir + '/.local/share/nvim/site/autoload/plug.vim' }}"
-      register: vim_plug
-
-    - name: Install vim-plug
-      shell: curl -fLo {{ home_dir + '/.local/share/nvim/site/autoload/plug.vim' }} --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-      when: not vim_plug.stat.exists
-
-    - name: Ensure group "docker" exists
-      group:
-        name: docker
+    - name: Install required APT packages
+      ansible.builtin.apt:
+        name:
+          - yadm
         state: present
-      become: true
+        update_cache: true
+        cache_valid_time: 3600
 
-    - name: Update the user
-      user:
-        name: "{{ local_user }}"
-        groups: docker
-        append: true
-      become: true
+    - name: Install Waterfox
+      ansible.builtin.include_role:
+        name: waterfox
+      tags: waterfox
 
-    - name: Generate an OpenSSH keypair with the default values (4096 bits, rsa)
-      community.crypto.openssh_keypair:
-        path: "{{ home_dir + '/.ssh/id_rsa' }}"
+    - name: Install Proton applications
+      ansible.builtin.include_role:
+        name: proton
+      tags: proton
 
-    - name: Check if the dconf settings file exists
-      stat:
-        path: "{{ gist_file }}"
-      register: dcconfig_gist
+    - name: Configure COSMIC
+      ansible.builtin.include_role:
+        name: cosmic
+      tags: cosmic
 
-    - block:
-        - name: load DCONF settings
-          shell: "dconf load '/' < '{{ gist_file }}'"
+    - name: Configure Alacritty
+      ansible.builtin.include_role:
+        name: alacritty
+      tags: alacritty
 
-        - name: Set multiple crons
-          cron:
-            name: "{{ item.name }}"
-            special_time: "{{ item.time }}"
-            job: "{{ item.job }}"
-          loop:
-            - {
-                name: "dump dconf",
-                time: "weekly",
-                job: "/usr/bin/dconf dump / > {{ gist_file }}",
-              }
-      when: dcconfig_gist.stat.exists
+    - name: Install Leaf
+      ansible.builtin.include_role:
+        name: leaf
+      tags: leaf
+
+    - name: Generate the SSH key
+      ansible.builtin.include_role:
+        name: ssh_keygen
+      tags: ssh_keygen
+
+    - name: Clone and manage dotfiles
+      ansible.builtin.include_role:
+        name: dotfiles

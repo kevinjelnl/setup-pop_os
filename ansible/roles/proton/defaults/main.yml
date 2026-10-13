@@ -1,0 +1,6 @@
+---
+proton_drive_version: '0.9.0'
+proton_drive_architecture: x86_64
+proton_drive_download_architecture: x64
+proton_mail_package: proton-mail
+proton_pass_package: proton-pass

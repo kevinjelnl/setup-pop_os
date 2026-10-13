@@ -1,0 +1,35 @@
+---
+- name: Ensure COSMIC configuration directories exist
+  ansible.builtin.file:
+    path: "{{ dotfiles_home }}/.config/cosmic/{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - com.system76.CosmicAppletTime/v1
+    - com.system76.CosmicComp/v1
+    - com.system76.CosmicPanel.Panel/v1
+    - com.system76.CosmicSettings.Shortcuts/v1
+    - com.system76.CosmicTheme.Dark.Builder/v2
+    - com.system76.CosmicTheme.Dark/v2
+    - com.system76.CosmicTheme.Light.Builder/v2
+    - com.system76.CosmicTheme.Light/v2
+  become: false
+
+- name: Install selected COSMIC configuration
+  ansible.builtin.copy:
+    src: ".config/cosmic/{{ item }}"
+    dest: "{{ dotfiles_home }}/.config/cosmic/{{ item }}"
+    mode: '0644'
+  loop:
+    - com.system76.CosmicAppletTime/v1/military_time
+    - com.system76.CosmicComp/v1/autotile
+    - com.system76.CosmicComp/v1/xkb_config
+    - com.system76.CosmicPanel.Panel/v1/plugins_wings
+    - com.system76.CosmicPanel.Panel/v1/plugins_center
+    - com.system76.CosmicComp/v1/appearance_settings
+    - com.system76.CosmicSettings.Shortcuts/v1/custom
+    - com.system76.CosmicTheme.Dark.Builder/v2/gaps
+    - com.system76.CosmicTheme.Dark/v2/gaps
+    - com.system76.CosmicTheme.Light.Builder/v2/gaps
+    - com.system76.CosmicTheme.Light/v2/gaps
+  become: false

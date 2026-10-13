@@ -1,43 +1,104 @@
-# Configure machine after reinstall
-(aims to... ) Makes reinstalling Pop!_os a breeze. Uses Ansible to configure the machine after a fresh install. 
+# Pop!_OS COSMIC workstation setup
 
-## Features
-- Manages apt packages (install, remove, update)
-- Manages GNOME extensions (install, remove)
-- Configures zsh with oh-my-zsh
-- Installs fonts
-- Configures dotfiles from https://github.com/kevinjelnl/dotfiles
+An Ansible-based setup for rebuilding a Pop!_OS COSMIC workstation. The repository is intended to be repeatable: system changes belong here so they can be applied to a new device later.
 
+## Responsibilities
 
-## DISCLAIMER
-Use at your own risk. This is a personal project configured to my needs. It might not work for you. Be careful with the roles and tasks that are executed, items are being downloaded from external sources.
+- **Ansible:** system packages, repositories, applications, COSMIC configuration, keyboard settings, SSH setup, and other Pop!_OS-specific configuration.
+- **yadm:** portable user dotfiles, shell configuration, and WSL setup.
 
+Ansible installs and clones yadm, but yadm remains independently usable in WSL.
 
-## How to use
-Clone the repo, cd into the dir, run the makefile
+## Initial setup
+
+Clone the repository and enter it:
+
+```bash
+git clone https://github.com/kevinjelnl/setup-pop_os.git
+cd setup-pop_os
+git switch cosmic
 ```
-git clone https://github.com/kevinjelnl/setup-pop_os.git 
-cd ./setup-pop_os
-git submodule init # to install the submodule(s)
-make setup_machine
+
+Install the Ansible prerequisites:
+
+```bash
+./scripts/1-after_clean_install.sh
 ```
-Note: a reboot / relog will be required for different settings to take effect.
 
-### Run a single role
-To run a single role, use the following command:
+Apply the workstation configuration:
+
+```bash
+make setup
 ```
-# Run a single role by using the tag value
-make run_playbook tag=manage_packages
+
+The playbook will prompt for the sudo password. After Ansible clones the dotfiles repository, run the interactive yadm bootstrap separately:
+
+```bash
+make bootstrap
 ```
-or any of defined roles in: ./ansible/playbook.yml
 
-## How to configure
-The configuration is done in the `./ansible/roles` directory. Each role has its own directory with a `main.yml` file. The `main.yml` file contains the tasks that are executed. Variables are stored within each role in the `vars` directory.
+## Make targets
 
-The `./ansible/playbook.yml` file is the main playbook that is executed. It contains the internal structure of the playbook and the roles that are executed. Within this file you can override variables or extend the playbook by adding new roles.
+```text
+make setup       Apply the complete Ansible playbook
+make remove      Remove packages listed in packages_to_remove
+make bootstrap   Run the interactive yadm bootstrap
+```
 
+Run an individual role with Ansible tags:
 
-## Under the hood
-https://system76.com/pop (for the OS)
-https://linuxconfig.org/introduction-to-the-dconf-configuration-system (for the dconf)
-https://github.com/essembeh/gnome-extensions-cli (for the gnome extensions)
+```bash
+ansible-playbook -i ansible/inventory.yml ansible/playbook.yml \
+  --ask-become-pass --tags cosmic
+```
+
+Available role tags include:
+
+- `packages`
+- `waterfox`
+- `proton`
+- `cosmic`
+- `alacritty`
+- `leaf`
+- `ssh_keygen`
+
+## Package maintenance
+
+Packages are managed in:
+
+```text
+ansible/roles/packages/defaults/main.yml
+```
+
+Add system packages to `packages_to_install` and unwanted APT packages to `packages_to_remove`. Flatpak removals are maintained in the package role tasks.
+
+Application versions and download settings belong in the relevant role defaults, such as:
+
+```text
+ansible/roles/proton/defaults/main.yml
+```
+
+## COSMIC configuration
+
+Selected COSMIC settings are stored in:
+
+```text
+ansible/roles/cosmic/files/.config/cosmic/
+```
+
+Only selected settings are managed; the complete runtime configuration directory is intentionally not copied.
+
+## SSH key
+
+The `ssh_keygen` role creates `~/.ssh/id_ed25519` once, without a passphrase. The private key remains on the machine and is never stored in this repository.
+
+## Safety
+
+Review changes before applying them:
+
+```bash
+ansible-playbook -i ansible/inventory.yml ansible/playbook.yml --syntax-check
+git diff
+```
+
+Do not commit credentials, private keys, tokens, or other machine-specific secrets.

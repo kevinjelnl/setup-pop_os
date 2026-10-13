@@ -1,6 +1,0 @@
----
-font_url: https://github.com/ryanoasis/nerd-fonts/releases/download/
-fonts_dir: "{{ home_dir + '/.fonts' }}"
-fonts:
-  - Hack
-  - Meslo

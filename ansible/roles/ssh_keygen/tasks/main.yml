@@ -1,0 +1,22 @@
+---
+- name: Ensure the SSH directory exists
+  ansible.builtin.file:
+    path: "{{ dotfiles_home }}/.ssh"
+    state: directory
+    mode: '0700'
+  become: false
+
+- name: Generate the default SSH key without a passphrase
+  ansible.builtin.command:
+    argv:
+      - ssh-keygen
+      - -t
+      - ed25519
+      - -f
+      - "{{ dotfiles_home }}/.ssh/id_ed25519"
+      - -N
+      - ''
+      - -C
+      - "{{ lookup('env', 'USER') }}@{{ ansible_facts['hostname'] }}"
+    creates: "{{ dotfiles_home }}/.ssh/id_ed25519"
+  become: false

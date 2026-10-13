@@ -1,0 +1,33 @@
+---
+- name: Install configured APT packages
+  ansible.builtin.apt:
+    name: "{{ packages_to_install }}"
+    state: present
+    update_cache: true
+  when: packages_to_install | length > 0
+
+- name: Remove configured APT packages
+  ansible.builtin.apt:
+    name: "{{ packages_to_remove }}"
+    state: absent
+    purge: true
+  when: packages_to_remove | length > 0
+
+- name: Check whether Flatpak is installed
+  ansible.builtin.command: command -v flatpak
+  register: flatpak_command
+  changed_when: false
+  failed_when: false
+
+- name: Remove Thunderbird Flatpak
+  ansible.builtin.command:
+    argv:
+      - flatpak
+      - uninstall
+      - --noninteractive
+      - org.mozilla.Thunderbird
+  register: thunderbird_removal
+  changed_when: thunderbird_removal.rc == 0
+  failed_when: thunderbird_removal.rc != 0 and 'is not installed' not in (thunderbird_removal.stdout + thunderbird_removal.stderr)
+  become: false
+  when: flatpak_command.rc == 0

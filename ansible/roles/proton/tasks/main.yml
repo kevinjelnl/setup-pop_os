@@ -1,0 +1,52 @@
+---
+- name: Gather installed package facts
+  ansible.builtin.package_facts:
+    manager: apt
+
+- name: Check whether Proton Drive is already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/proton-drive
+  register: proton_drive_binary
+
+- name: Download Proton Mail
+  ansible.builtin.get_url:
+    url: https://proton.me/download/mail/linux/ProtonMail-desktop-beta.deb
+    dest: /tmp/protonmail-desktop-beta.deb
+    mode: '0644'
+  when: proton_mail_package not in ansible_facts.packages
+
+- name: Download Proton Pass
+  ansible.builtin.get_url:
+    url: https://proton.me/download/PassDesktop/linux/x64/ProtonPass.deb
+    dest: /tmp/protonpass.deb
+    mode: '0644'
+  when: proton_pass_package not in ansible_facts.packages
+
+- name: Install Proton Mail
+  ansible.builtin.apt:
+    deb: /tmp/protonmail-desktop-beta.deb
+    state: present
+  when: proton_mail_package not in ansible_facts.packages
+
+- name: Install Proton Pass
+  ansible.builtin.apt:
+    deb: /tmp/protonpass.deb
+    state: present
+  when: proton_pass_package not in ansible_facts.packages
+
+- name: Download Proton Drive CLI for x64
+  ansible.builtin.get_url:
+    url: "https://proton.me/download/drive/cli/{{ proton_drive_version }}/linux-{{ proton_drive_download_architecture }}/proton-drive"
+    dest: /usr/local/bin/proton-drive
+    mode: '0755'
+  when:
+    - ansible_facts['architecture'] == proton_drive_architecture
+    - not proton_drive_binary.stat.exists
+
+- name: Remove downloaded Proton packages
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/protonmail-desktop-beta.deb
+    - /tmp/protonpass.deb

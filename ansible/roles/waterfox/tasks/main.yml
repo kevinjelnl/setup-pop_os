@@ -1,0 +1,25 @@
+---
+- name: Install the Waterfox repository signing key
+  ansible.builtin.get_url:
+    url: https://download.opensuse.org/repositories/isv:/BrowserWorks/xUbuntu_{{ ansible_facts['distribution_version'] }}/Release.key
+    dest: /usr/share/keyrings/waterfox.asc
+    mode: '0644'
+
+- name: Configure the Waterfox APT repository
+  ansible.builtin.deb822_repository:
+    name: waterfox
+    types: deb
+    uris: https://download.opensuse.org/repositories/isv:/BrowserWorks/xUbuntu_{{ ansible_facts['distribution_version'] }}/
+    suites: /
+    signed_by: /usr/share/keyrings/waterfox.asc
+    enabled: true
+    state: present
+
+- name: Update APT cache after adding the Waterfox repository
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Waterfox
+  ansible.builtin.apt:
+    name: waterfox
+    state: present
