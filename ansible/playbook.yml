@@ -25,6 +25,11 @@
         name: waterfox
       tags: waterfox
 
+    - name: Install Tailscale
+      ansible.builtin.include_role:
+        name: tailscale
+      tags: tailscale
+
     - name: Install Proton applications
       ansible.builtin.include_role:
         name: proton

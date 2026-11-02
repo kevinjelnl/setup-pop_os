@@ -14,7 +14,7 @@
   when: packages_to_remove | length > 0
 
 - name: Check whether Flatpak is installed
-  ansible.builtin.command: command -v flatpak
+  ansible.builtin.shell: command -v flatpak
   register: flatpak_command
   changed_when: false
   failed_when: false

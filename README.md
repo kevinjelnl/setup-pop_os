@@ -16,7 +16,6 @@ Clone the repository and enter it:
 ```bash
 git clone https://github.com/kevinjelnl/setup-pop_os.git
 cd setup-pop_os
-git switch cosmic
 ```
 
 Install the Ansible prerequisites:
@@ -56,6 +55,7 @@ Available role tags include:
 
 - `packages`
 - `waterfox`
+- `tailscale`
 - `proton`
 - `cosmic`
 - `alacritty`

@@ -1,0 +1,25 @@
+---
+- name: Check whether Tailscale is already installed
+  ansible.builtin.shell: command -v tailscale
+  register: tailscale_binary
+  changed_when: false
+  failed_when: false
+
+- name: Download the Tailscale installer
+  ansible.builtin.get_url:
+    url: https://tailscale.com/install.sh
+    dest: /tmp/tailscale-install.sh
+    mode: '0700'
+  when: tailscale_binary.rc != 0
+
+- name: Install Tailscale
+  ansible.builtin.command:
+    argv:
+      - /bin/sh
+      - /tmp/tailscale-install.sh
+  when: tailscale_binary.rc != 0
+
+- name: Remove the Tailscale installer
+  ansible.builtin.file:
+    path: /tmp/tailscale-install.sh
+    state: absent

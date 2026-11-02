@@ -7,7 +7,7 @@
   become: false
 
 - name: Check whether Leaf is already installed
-  ansible.builtin.command: command -v leaf
+  ansible.builtin.shell: command -v leaf
   register: leaf_binary
   changed_when: false
   failed_when: false
