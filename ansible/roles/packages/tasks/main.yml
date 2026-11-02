@@ -19,6 +19,18 @@
   changed_when: false
   failed_when: false
 
+- name: Check whether Thunderbird is installed as a Flatpak
+  ansible.builtin.command:
+    argv:
+      - flatpak
+      - info
+      - org.mozilla.Thunderbird
+  register: thunderbird_flatpak
+  changed_when: false
+  failed_when: false
+  become: false
+  when: flatpak_command.rc == 0
+
 - name: Remove Thunderbird Flatpak
   ansible.builtin.command:
     argv:
@@ -26,8 +38,7 @@
       - uninstall
       - --noninteractive
       - org.mozilla.Thunderbird
-  register: thunderbird_removal
-  changed_when: thunderbird_removal.rc == 0
-  failed_when: thunderbird_removal.rc != 0 and 'is not installed' not in (thunderbird_removal.stdout + thunderbird_removal.stderr)
   become: false
-  when: flatpak_command.rc == 0
+  when:
+    - flatpak_command.rc == 0
+    - thunderbird_flatpak.rc == 0
