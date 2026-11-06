@@ -1,0 +1,13 @@
+---
+docker_supported_ubuntu_codenames:
+  - jammy
+  - noble
+docker_user: "{{ lookup('env', 'USER') }}"
+docker_conflicting_packages:
+  - docker.io
+  - docker-compose
+  - docker-compose-v2
+  - docker-doc
+  - podman-docker
+  - containerd
+  - runc

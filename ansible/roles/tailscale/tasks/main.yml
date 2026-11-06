@@ -10,14 +10,14 @@
     url: https://tailscale.com/install.sh
     dest: /tmp/tailscale-install.sh
     mode: '0700'
-  when: tailscale_binary.rc != 0
+  when: tailscale_binary.rc != 0 or update_binaries | bool
 
 - name: Install Tailscale
   ansible.builtin.command:
     argv:
       - /bin/sh
       - /tmp/tailscale-install.sh
-  when: tailscale_binary.rc != 0
+  when: tailscale_binary.rc != 0 or update_binaries | bool
 
 - name: Remove the Tailscale installer
   ansible.builtin.file:

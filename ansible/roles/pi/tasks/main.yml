@@ -1,0 +1,61 @@
+---
+- name: Check whether the NodeSource repository is configured
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/nodesource.list
+  register: nodesource_repository
+
+- name: Download the current NodeSource installer
+  ansible.builtin.get_url:
+    url: https://deb.nodesource.com/setup_current.x
+    dest: /tmp/nodesource-current.sh
+    mode: '0700'
+  when: not nodesource_repository.stat.exists
+
+- name: Configure the current Node.js repository
+  ansible.builtin.command:
+    argv:
+      - /bin/bash
+      - /tmp/nodesource-current.sh
+  when: not nodesource_repository.stat.exists
+
+- name: Install or update the latest Node.js and npm
+  ansible.builtin.apt:
+    name: nodejs
+    state: latest
+    update_cache: true
+
+- name: Remove the NodeSource installer
+  ansible.builtin.file:
+    path: /tmp/nodesource-current.sh
+    state: absent
+  when: not nodesource_repository.stat.exists
+
+- name: Check whether pi is already installed
+  ansible.builtin.stat:
+    path: "{{ dotfiles_home }}/.local/bin/pi"
+  register: pi_binary
+  become: false
+
+- name: Download the pi installer
+  ansible.builtin.get_url:
+    url: https://pi.dev/install.sh
+    dest: /tmp/pi-install.sh
+    mode: '0700'
+  become: false
+  when: not pi_binary.stat.exists or update_binaries | bool
+
+- name: Install or update pi
+  ansible.builtin.command:
+    argv:
+      - /bin/bash
+      - /tmp/pi-install.sh
+  args:
+    chdir: "{{ dotfiles_home }}"
+  become: false
+  when: not pi_binary.stat.exists or update_binaries | bool
+
+- name: Remove the pi installer
+  ansible.builtin.file:
+    path: /tmp/pi-install.sh
+    state: absent
+  become: false

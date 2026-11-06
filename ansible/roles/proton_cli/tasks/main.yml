@@ -1,0 +1,32 @@
+---
+- name: Check whether Proton Pass CLI is already installed
+  ansible.builtin.stat:
+    path: "{{ dotfiles_home }}/.local/bin/pass-cli"
+  register: proton_pass_cli_binary
+  become: false
+
+- name: Download the Proton Pass CLI installer
+  ansible.builtin.get_url:
+    url: https://proton.me/download/pass-cli/install.sh
+    dest: /tmp/proton-pass-cli-install.sh
+    mode: '0700'
+  become: false
+  when:
+    - not proton_pass_cli_binary.stat.exists or update_binaries | bool
+
+- name: Install or update Proton Pass CLI
+  ansible.builtin.command:
+    argv:
+      - /bin/bash
+      - /tmp/proton-pass-cli-install.sh
+  args:
+    chdir: "{{ dotfiles_home }}"
+  become: false
+  when:
+    - not proton_pass_cli_binary.stat.exists or update_binaries | bool
+
+- name: Remove the Proton Pass CLI installer
+  ansible.builtin.file:
+    path: /tmp/proton-pass-cli-install.sh
+    state: absent
+  become: false

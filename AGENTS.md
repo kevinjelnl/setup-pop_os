@@ -17,7 +17,6 @@ This repository rebuilds and configures a Pop!_OS COSMIC workstation with Ansibl
 - `ansible/roles/`: idempotent, focused configuration roles.
 - `ansible/roles/packages/`: central package installation and removal lists.
 - `ansible/roles/cosmic/`: Pop!_OS COSMIC configuration.
-- `to_be_deleted/`: obsolete files only; do not recreate it.
 
 ## Change conventions
 

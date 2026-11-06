@@ -22,4 +22,4 @@
 - name: Install Waterfox
   ansible.builtin.apt:
     name: waterfox
-    state: present
+    state: "{{ 'latest' if update_binaries | bool else 'present' }}"

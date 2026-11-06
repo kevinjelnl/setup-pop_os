@@ -5,7 +5,7 @@ ANSIBLE := $(HOME)/.virtualenvs/ansible/bin/ansible-playbook
 INVENTORY := $(ANSIBLE_DIR)/inventory.yml
 PLAYBOOK := $(ANSIBLE_DIR)/playbook.yml
 
-.PHONY: setup remove bootstrap check-ansible
+.PHONY: setup update update-proton remove bootstrap check-ansible
 
 check-ansible:
 	@test -x "$(ANSIBLE)" || { \
@@ -16,6 +16,12 @@ check-ansible:
 
 setup: check-ansible
 	$(ANSIBLE) -i $(INVENTORY) $(PLAYBOOK) --ask-become-pass
+
+update: check-ansible
+	$(ANSIBLE) -i $(INVENTORY) $(PLAYBOOK) --ask-become-pass -e update_binaries=true
+
+update-proton: check-ansible
+	$(ANSIBLE) -i $(INVENTORY) $(PLAYBOOK) --ask-become-pass --tags proton -e update_binaries=true
 
 remove: check-ansible
 	$(ANSIBLE) -i $(INVENTORY) $(PLAYBOOK) --ask-become-pass --tags packages

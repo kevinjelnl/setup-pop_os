@@ -1,0 +1,208 @@
+---
+- name: Read the Ubuntu base codename
+  ansible.builtin.shell: |
+    . /etc/os-release
+    printf '%s' "${UBUNTU_CODENAME:-$VERSION_CODENAME}"
+  register: docker_ubuntu_codename_result
+  changed_when: false
+
+- name: Read the system architecture
+  ansible.builtin.command: dpkg --print-architecture
+  register: docker_architecture_result
+  changed_when: false
+
+- name: Set Docker repository facts
+  ansible.builtin.set_fact:
+    docker_ubuntu_codename: "{{ docker_ubuntu_codename_result.stdout }}"
+    docker_architecture: "{{ docker_architecture_result.stdout }}"
+
+- name: Require a supported Ubuntu base release
+  ansible.builtin.assert:
+    that: docker_ubuntu_codename in docker_supported_ubuntu_codenames
+    fail_msg: >-
+      Docker's official Ubuntu repository is not configured for the detected
+      Ubuntu base codename '{{ docker_ubuntu_codename }}'. No substitute
+      codename will be used. Supported codenames configured here:
+      {{ docker_supported_ubuntu_codenames | join(', ') }}.
+
+- name: Gather installed package facts
+  ansible.builtin.package_facts:
+    manager: apt
+
+- name: Find conflicting Docker packages
+  ansible.builtin.set_fact:
+    docker_installed_conflicts: >-
+      {{ docker_conflicting_packages | select('in', ansible_facts.packages) | list }}
+
+- name: Stop before changing an existing conflicting installation
+  ansible.builtin.fail:
+    msg: >-
+      Conflicting Docker packages are already installed:
+      {{ docker_installed_conflicts | join(', ') }}.
+      No packages or Docker data were removed. Review and remove or migrate
+      them manually before rerunning this role.
+  when: docker_installed_conflicts | length > 0
+
+- name: Install Docker repository prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+    state: present
+    update_cache: true
+
+- name: Ensure the APT keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Install Docker's repository signing key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+
+- name: Configure Docker's official APT repository
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: https://download.docker.com/linux/ubuntu
+    suites: "{{ docker_ubuntu_codename }}"
+    components: stable
+    architectures: "{{ docker_architecture }}"
+    signed_by: /etc/apt/keyrings/docker.asc
+    enabled: true
+    state: present
+
+- name: Update the APT cache after adding Docker's repository
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install Docker Engine and Compose
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+      - docker-ce-rootless-extras
+      - uidmap
+      - dbus-user-session
+      - slirp4netns
+      - fuse-overlayfs
+    state: "{{ 'latest' if update_binaries | bool else 'present' }}"
+
+- name: Stop and disable the rootful Docker service
+  ansible.builtin.systemd_service:
+    name: docker
+    enabled: false
+    state: stopped
+
+- name: Check whether the user is in the rootful Docker group
+  ansible.builtin.command:
+    argv:
+      - id
+      - -nG
+      - "{{ docker_user }}"
+  register: docker_user_groups
+  changed_when: false
+
+- name: Remove the user from the rootful Docker group
+  ansible.builtin.command:
+    argv:
+      - gpasswd
+      - --delete
+      - "{{ docker_user }}"
+      - docker
+  when: "'docker' in docker_user_groups.stdout.split()"
+
+- name: Check whether Docker user lingering is enabled
+  ansible.builtin.command:
+    argv:
+      - loginctl
+      - show-user
+      - "{{ docker_user }}"
+      - --property=Linger
+      - --value
+  register: docker_linger
+  changed_when: false
+
+- name: Enable Docker rootless services after logout
+  ansible.builtin.command:
+    argv:
+      - loginctl
+      - enable-linger
+      - "{{ docker_user }}"
+  when: docker_linger.stdout != 'yes'
+
+- name: Read the Docker user's UID
+  ansible.builtin.command:
+    argv:
+      - id
+      - -u
+      - "{{ docker_user }}"
+  register: docker_user_uid_result
+  changed_when: false
+
+- name: Check whether rootless Docker is configured
+  ansible.builtin.stat:
+    path: "{{ dotfiles_home }}/.config/systemd/user/docker.service"
+  register: docker_rootless_service
+  become: false
+
+- name: Configure rootless Docker for the current user
+  ansible.builtin.command: dockerd-rootless-setuptool.sh install
+  args:
+    chdir: "{{ dotfiles_home }}"
+  environment:
+    HOME: "{{ dotfiles_home }}"
+    XDG_RUNTIME_DIR: "/run/user/{{ docker_user_uid_result.stdout }}"
+  become: false
+  when: not docker_rootless_service.stat.exists
+
+- name: Check whether the rootless Docker user service is active
+  ansible.builtin.command: systemctl --user is-active docker
+  register: docker_user_service
+  changed_when: false
+  failed_when: false
+  environment:
+    HOME: "{{ dotfiles_home }}"
+    XDG_RUNTIME_DIR: "/run/user/{{ docker_user_uid_result.stdout }}"
+  become: false
+
+- name: Enable and start the rootless Docker user service
+  ansible.builtin.command: systemctl --user enable --now docker
+  environment:
+    HOME: "{{ dotfiles_home }}"
+    XDG_RUNTIME_DIR: "/run/user/{{ docker_user_uid_result.stdout }}"
+  become: false
+  when: docker_user_service.rc != 0
+
+- name: Select the rootless Docker context
+  ansible.builtin.command: docker context use rootless
+  environment:
+    HOME: "{{ dotfiles_home }}"
+  become: false
+  changed_when: false
+
+- name: Verify rootless Docker
+  ansible.builtin.command: docker info
+  environment:
+    HOME: "{{ dotfiles_home }}"
+    DOCKER_HOST: "unix:///run/user/{{ docker_user_uid_result.stdout }}/docker.sock"
+  become: false
+  changed_when: false
+
+- name: Verify Docker Compose is available
+  ansible.builtin.command: docker compose version
+  environment:
+    HOME: "{{ dotfiles_home }}"
+  become: false
+  register: docker_compose_version
+  changed_when: false
+
+- name: Display Docker Compose version
+  ansible.builtin.debug:
+    msg: "{{ docker_compose_version.stdout }}"

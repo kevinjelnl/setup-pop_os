@@ -5,6 +5,7 @@
   gather_facts: true
   vars:
     dotfiles_home: "{{ lookup('env', 'HOME') }}"
+    update_binaries: false
 
   tasks:
     - name: Manage APT packages
@@ -30,10 +31,20 @@
         name: tailscale
       tags: tailscale
 
+    - name: Install Docker Engine and Compose
+      ansible.builtin.include_role:
+        name: docker
+      tags: docker
+
     - name: Install Proton applications
       ansible.builtin.include_role:
         name: proton
       tags: proton
+
+    - name: Install Proton Pass CLI
+      ansible.builtin.include_role:
+        name: proton_cli
+      tags: proton_cli
 
     - name: Configure COSMIC
       ansible.builtin.include_role:
@@ -49,6 +60,11 @@
       ansible.builtin.include_role:
         name: leaf
       tags: leaf
+
+    - name: Install pi
+      ansible.builtin.include_role:
+        name: pi
+      tags: pi
 
     - name: Generate the SSH key
       ansible.builtin.include_role:

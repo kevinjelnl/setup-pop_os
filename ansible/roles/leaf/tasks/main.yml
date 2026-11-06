@@ -1,17 +1,18 @@
 ---
-- name: Download the Leaf installer
-  ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/RivoLink/leaf/main/scripts/install.sh
-    dest: /tmp/leaf-install.sh
-    mode: '0700'
-  become: false
-
 - name: Check whether Leaf is already installed
   ansible.builtin.shell: command -v leaf
   register: leaf_binary
   changed_when: false
   failed_when: false
   become: false
+
+- name: Download the Leaf installer
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/RivoLink/leaf/main/scripts/install.sh
+    dest: /tmp/leaf-install.sh
+    mode: '0700'
+  become: false
+  when: leaf_binary.rc != 0 or update_binaries | bool
 
 - name: Install Leaf
   ansible.builtin.command:
@@ -20,7 +21,7 @@
       - /tmp/leaf-install.sh
     chdir: "{{ dotfiles_home }}"
   become: false
-  when: leaf_binary.rc != 0
+  when: leaf_binary.rc != 0 or update_binaries | bool
 
 - name: Remove the Leaf installer
   ansible.builtin.file:

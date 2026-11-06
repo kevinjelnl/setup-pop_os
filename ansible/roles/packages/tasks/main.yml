@@ -2,7 +2,7 @@
 - name: Install configured APT packages
   ansible.builtin.apt:
     name: "{{ packages_to_install }}"
-    state: present
+    state: "{{ 'latest' if update_binaries | bool else 'present' }}"
     update_cache: true
   when: packages_to_install | length > 0
 

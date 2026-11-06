@@ -13,26 +13,26 @@
     url: https://proton.me/download/mail/linux/ProtonMail-desktop-beta.deb
     dest: /tmp/protonmail-desktop-beta.deb
     mode: '0644'
-  when: proton_mail_package not in ansible_facts.packages
+  when: proton_mail_package not in ansible_facts.packages or update_binaries | bool
 
 - name: Download Proton Pass
   ansible.builtin.get_url:
     url: https://proton.me/download/PassDesktop/linux/x64/ProtonPass.deb
     dest: /tmp/protonpass.deb
     mode: '0644'
-  when: proton_pass_package not in ansible_facts.packages
+  when: proton_pass_package not in ansible_facts.packages or update_binaries | bool
 
 - name: Install Proton Mail
   ansible.builtin.apt:
     deb: /tmp/protonmail-desktop-beta.deb
     state: present
-  when: proton_mail_package not in ansible_facts.packages
+  when: proton_mail_package not in ansible_facts.packages or update_binaries | bool
 
 - name: Install Proton Pass
   ansible.builtin.apt:
     deb: /tmp/protonpass.deb
     state: present
-  when: proton_pass_package not in ansible_facts.packages
+  when: proton_pass_package not in ansible_facts.packages or update_binaries | bool
 
 - name: Download Proton Drive CLI for x64
   ansible.builtin.get_url:
@@ -41,7 +41,7 @@
     mode: '0755'
   when:
     - ansible_facts['architecture'] == proton_drive_architecture
-    - not proton_drive_binary.stat.exists
+    - not proton_drive_binary.stat.exists or update_binaries | bool
 
 - name: Remove downloaded Proton packages
   ansible.builtin.file:

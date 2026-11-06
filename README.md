@@ -40,6 +40,8 @@ make bootstrap
 
 ```text
 make setup       Apply the complete Ansible playbook
+make update      Update managed packages and downloaded binaries
+make update-proton Update Proton Mail, Pass, and Drive
 make remove      Remove packages listed in packages_to_remove
 make bootstrap   Run the interactive yadm bootstrap
 ```
@@ -56,10 +58,13 @@ Available role tags include:
 - `packages`
 - `waterfox`
 - `tailscale`
+- `docker`
 - `proton`
+- `proton_cli`
 - `cosmic`
 - `alacritty`
 - `leaf`
+- `pi`
 - `ssh_keygen`
 
 ## Package maintenance
@@ -71,6 +76,10 @@ ansible/roles/packages/defaults/main.yml
 ```
 
 Add system packages to `packages_to_install` and unwanted APT packages to `packages_to_remove`. Flatpak removals are maintained in the package role tasks.
+
+The Proton Pass CLI is installed without logging in. Authenticate manually on the machine when needed; never put a Proton PAT, vault name, or vault ID in this public repository.
+
+Docker is installed from Docker's official Ubuntu APT repository in rootless mode. The rootful system service is disabled, the user service is enabled, and the user is not added to the `docker` group. This avoids granting Docker's root-equivalent group privilege. Log out and back in if the user service is not immediately available.
 
 Application versions and download settings belong in the relevant role defaults, such as:
 
